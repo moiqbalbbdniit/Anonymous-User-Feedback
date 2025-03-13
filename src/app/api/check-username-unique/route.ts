@@ -50,14 +50,14 @@ export async function GET(request: Request) {
           success: false,
           message: 'Username is already taken',
         },
-        { status: 200 }
+        { status: 400 }
       );
     }
 
     return Response.json(
       {
         success: true,
-        message: 'Username is unique',
+        message: 'Username is available',
       },
       { status: 200 }
     );
