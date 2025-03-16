@@ -21,6 +21,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLoader } from "@/context/LoaderContext";
+import { start } from "repl";
 
 const page = () => {
   const [username, setUsername] = useState("");
@@ -29,6 +31,7 @@ const page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const debounced = useDebounceCallback(setUsername, 300);
   const router = useRouter();
+  const {startLoading,stopLoading} = useLoader()
 
   //zod implementation
   const form = useForm<z.infer<typeof signUpSchema>>({
@@ -72,7 +75,9 @@ const page = () => {
     try {
       const response = await axios.post<ApiResponse>("/api/sign-up", data);
       toast.success(response.data.message);
+      startLoading()
       router.replace(`/verify/${username}`);
+      stopLoading()
     } catch (error) {
       console.error("Error in sign-up", error);
       const axiosError = error as AxiosError<ApiResponse>;
@@ -172,7 +177,7 @@ const page = () => {
         <div className="text-center mt-4">
           <p>
             Already a member?{" "}
-            <Link href="/sign-in" className="text-blue-600 hover:text-blue-800">
+            <Link href="/sign-in" onClick={()=>{startLoading();stopLoading();}} className="text-blue-600 hover:text-blue-800">
               Sign in
             </Link>
           </p>

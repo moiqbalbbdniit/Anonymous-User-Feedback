@@ -18,6 +18,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useLoader } from '@/context/LoaderContext';
+import { start } from 'node:repl';
 
 // Validation Schema
 const signInSchema = z.object({
@@ -29,7 +31,7 @@ export default function SignInForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const {startLoading,stopLoading} = useLoader()
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -50,13 +52,17 @@ export default function SignInForm() {
     setLoading(false);
 
     if (result?.error) {
+      startLoading()
       toast.error("Invalid email or password");
+      stopLoading()
       return;
     }
 
     if (result?.url) {
+      startLoading()
       toast.success("Login successful! Redirecting...");
       router.replace('/dashboard');
+      stopLoading()
     }
   };
 
@@ -114,7 +120,7 @@ export default function SignInForm() {
         <div className="text-center mt-4">
           <p>
             Not a member yet?{' '}
-            <Link href="/sign-up" className="text-blue-600 hover:text-blue-800">
+            <Link href="/sign-up" onClick={() => { startLoading(); stopLoading(); }} className="text-blue-600 hover:text-blue-800">
               Sign up
             </Link>
           </p>

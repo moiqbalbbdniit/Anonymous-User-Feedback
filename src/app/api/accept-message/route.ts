@@ -2,85 +2,105 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
+import mongoose from "mongoose";
 import { User } from "next-auth";
 
-export async function POST(request:Request){
-    await dbConnect()
+export async function POST(request: Request) {
+  await dbConnect();
 
-    const session = await getServerSession(authOptions)
-    const user : User = session?.user as User
+  const session = await getServerSession(authOptions);
+  const user: User = session?.user as User;
 
-    if(!session || !session.user){
-        return Response.json({
-            success:false,
-            message:"You need to be logged in to accept a message"
-        })
-    }
-    const userId = user._id;
-    const {acceptMessage} = await request.json()
+  if (!session || !session.user) {
+    return Response.json({
+      success: false,
+      message: "You need to be logged in to accept a message",
+    }, { status: 401 });
+  }
 
-    try {
-        const updatedUser = await UserModel.findByIdAndUpdate(
-            userId,
-            {isAcceptingMessages:acceptMessage},
-            {new:true}
-        )
-        if(!updatedUser){
-            return Response.json({
-                success:false,
-                message:"User not found"
-            })
-        }else{
-            return Response.json({
-                success:true,
-                message:"User status updated successfully"
-            })
-        }
+  if (!user._id || !mongoose.Types.ObjectId.isValid(user._id)) {
+    return Response.json({
+      success: false,
+      message: "Invalid or missing user ID",
+    }, { status: 400 });
+  }
 
-    } catch (error) {
-        console.log("failed to update user status to accept msg",error)
-        return Response.json({
-            success:false,
-            message:"Failed to update user status to accept msg"
-        })
+  const userId = new mongoose.Types.ObjectId(user._id);
+  const { acceptMessage } = await request.json();
+
+  try {
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { isAcceptingMessages: acceptMessage }, // ✅ Updated property name
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return Response.json({
+        success: false,
+        message: "User not found",
+      }, { status: 404 });
     }
 
+    return Response.json({
+      success: true,
+      message: "User status updated successfully",
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Failed to update user status:", error);
+    return Response.json({
+      success: false,
+      message: "Failed to update user status",
+    }, { status: 500 });
+  }
 }
 
-export async function GET(request:Request){
-    await dbConnect()
-    const session = await getServerSession(authOptions)
-    const user : User = session?.user as User
+export async function GET(request: Request) {
+  await dbConnect();
+  const session = await getServerSession(authOptions);
+  const user: User = session?.user as User;
 
-    if(!session || !session.user){
-        return Response.json({
-            success:false,
-            message:"You need to be logged in to accept a message"
-        })
-    }
-    const userId = user._id;
+  if (!session || !session.user) {
+    return Response.json({
+      success: false,
+      message: "You need to be logged in to fetch messages",
+    }, { status: 401 });
+  }
 
-    try {
-        const foundUser = await UserModel.findById(userId)
-    if(!foundUser){
-        return Response.json({
-            success:false,
-            message:"User not found"
-        })
-    }else{
-        return Response.json({
-            success:true,
-            message:"User found",
-            data:{
-                isAcceptingMessages:foundUser.isAcceptingMessage
-            }
-        })
+  if (!user._id || !mongoose.Types.ObjectId.isValid(user._id)) {
+    return Response.json({
+      success: false,
+      message: "Invalid or missing user ID",
+    }, { status: 400 });
+  }
+
+  const userId = new mongoose.Types.ObjectId(user._id);
+
+  try {
+    const foundUser = await UserModel.findById(userId).select("isAcceptingMessages messages");
+
+    if (!foundUser) {
+      return Response.json({
+        success: false,
+        message: "User not found",
+      }, { status: 404 });
     }
-    } catch (error) {
-        console.log("failed to get user status to accept msg",error)
-        return Response.json({
-            success:false,
-            message:"error in getting msg status"
-        })      
-    }
+
+    return Response.json({
+      success: true,
+      message: "User found",
+      data: {
+        isAcceptingMessages: foundUser.isAcceptingMessages, // ✅ Updated property name
+        messages: foundUser.messages || [],
+      }
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Failed to fetch user messages:", error);
+    return Response.json({
+      success: false,
+      message: "Error in fetching messages",
+    }, { status: 500 });
+  }
 }
