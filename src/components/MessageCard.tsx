@@ -4,7 +4,7 @@ import React from 'react';
 import axios, { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { X } from 'lucide-react';
-import {Message} from '@/model/User';
+
 
 // Ensure message._id is a string
 interface LocalMessage {
