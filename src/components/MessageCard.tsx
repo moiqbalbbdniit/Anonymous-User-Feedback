@@ -7,11 +7,7 @@ import { X } from 'lucide-react';
 
 
 // Ensure message._id is a string
-interface LocalMessage {
-  _id: string;
-  content: string;
-  createdAt: string;
-}
+
 
 // Ensure message._id is a string
 
@@ -32,9 +28,10 @@ import {
 import { Button } from './ui/button';
 import {toast} from "sonner"
 import { ApiResponse } from '@/types/ApiResponse';
+import { Message } from '@/model/User';
 
 type MessageCardProps = {
-  message: LocalMessage;
+  message: Message;
   onMessageDelete: (messageId: string) => void;
 };
 
