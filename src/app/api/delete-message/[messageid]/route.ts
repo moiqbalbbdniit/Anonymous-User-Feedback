@@ -4,11 +4,11 @@ import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
 import { authOptions } from "../../auth/[...nextauth]/options";
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { messageid: string } } // ✅ Ensure correct type
-) {
-  if (!params?.messageid) {
+export async function DELETE(request: Request) {
+  const url = new URL(request.url);
+  const messageId = url.pathname.split("/").pop(); // Extract messageid manually
+
+  if (!messageId) {
     return NextResponse.json(
       { success: false, message: "Message ID is required" },
       { status: 400 }
@@ -28,7 +28,7 @@ export async function DELETE(
   try {
     const updateResult = await UserModel.updateOne(
       { _id: session.user._id },
-      { $pull: { messages: { _id: params.messageid } } }
+      { $pull: { messages: { _id: messageId } } }
     );
 
     if (updateResult.modifiedCount === 0) {
