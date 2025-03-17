@@ -1,15 +1,22 @@
-import UserModel from "@/model/User";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
 import { authOptions } from "../../auth/[...nextauth]/options";
-import { NextResponse } from "next/server";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { messageid: string } }
+  { params }: { params: { messageid: string } } // ✅ Ensure correct type
 ) {
+  if (!params?.messageid) {
+    return NextResponse.json(
+      { success: false, message: "Message ID is required" },
+      { status: 400 }
+    );
+  }
+
   await dbConnect();
-  
+
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json(
@@ -18,12 +25,10 @@ export async function DELETE(
     );
   }
 
-  const messageId = params.messageid;
-
   try {
     const updateResult = await UserModel.updateOne(
       { _id: session.user._id },
-      { $pull: { messages: { _id: messageId } } }
+      { $pull: { messages: { _id: params.messageid } } }
     );
 
     if (updateResult.modifiedCount === 0) {
@@ -34,13 +39,13 @@ export async function DELETE(
     }
 
     return NextResponse.json(
-      { success: true, message: "Message deleted" },
+      { success: true, message: "Message deleted successfully" },
       { status: 200 }
     );
   } catch (error) {
     console.error("Error deleting message:", error);
     return NextResponse.json(
-      { success: false, message: "Error deleting message" },
+      { success: false, message: "Internal server error" },
       { status: 500 }
     );
   }
