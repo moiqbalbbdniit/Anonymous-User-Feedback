@@ -1,10 +1,17 @@
 'use client'
 
-import React, { useState } from 'react';
+import React from 'react';
 import axios, { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { X } from 'lucide-react';
 import {Message} from '@/model/User';
+
+// Ensure message._id is a string
+interface LocalMessage {
+  _id: string;
+  content: string;
+  createdAt: string;
+}
 
 // Ensure message._id is a string
 
@@ -27,7 +34,7 @@ import {toast} from "sonner"
 import { ApiResponse } from '@/types/ApiResponse';
 
 type MessageCardProps = {
-  message: Message;
+  message: LocalMessage;
   onMessageDelete: (messageId: string) => void;
 };
 

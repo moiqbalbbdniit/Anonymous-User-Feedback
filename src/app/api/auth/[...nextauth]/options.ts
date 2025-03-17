@@ -1,30 +1,38 @@
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import dbConnect from '@/lib/dbConnect';
-import UserModel from '@/model/User';
+import { NextAuthOptions, User } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { JWT } from "next-auth/jwt";
+import { Session } from "next-auth";
+import bcrypt from "bcryptjs";
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      id: 'credentials',
-      name: 'Credentials',
+      id: "credentials",
+      name: "Credentials",
       credentials: {
-        email: { label: 'Email', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: any): Promise<any> {
+      async authorize(
+        credentials: Partial<Record<"email" | "password", string>> | undefined
+      ): Promise<User | null> {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
+
         await dbConnect();
+
         try {
-          // Find user only by email (removed username search)
           const user = await UserModel.findOne({ email: credentials.email });
 
           if (!user) {
-            throw new Error('No user found with this email');
+            throw new Error("No user found with this email");
           }
 
           if (!user.isVerified) {
-            throw new Error('Please verify your account before logging in');
+            throw new Error("Please verify your account before logging in");
           }
 
           const isPasswordCorrect = await bcrypt.compare(
@@ -33,27 +41,27 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordCorrect) {
-            throw new Error('Incorrect password');
+            throw new Error("Incorrect password");
           }
 
-          return user;
-        } catch (err: any) {
-          throw new Error(err.message || 'Something went wrong');
+          return user as User;
+        } catch (err) {
+          throw new Error(err instanceof Error ? err.message : "Something went wrong");
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }): Promise<JWT> {
       if (user) {
-        token._id = user._id?.toString(); // Convert ObjectId to string
+        token._id = user._id?.toString();
         token.isVerified = user.isVerified;
         token.isAcceptingMessage = user.isAcceptingMessage;
         token.username = user.username;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
       if (token) {
         session.user._id = token._id;
         session.user.isVerified = token.isVerified;
@@ -64,10 +72,10 @@ export const authOptions: NextAuthOptions = {
     },
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: '/sign-in',
+    signIn: "/sign-in",
   },
 };

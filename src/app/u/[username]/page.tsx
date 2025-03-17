@@ -25,7 +25,7 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { messageSchema } from "@/schemas/messageSchema";
 
-const specialChar = "||";
+// const specialChar = "||";
 
 export default function SendMessage() {
   const params = useParams<{ username: string }>();
@@ -148,7 +148,7 @@ export default function SendMessage() {
                 </Button>
               ))
             ) : (
-              <p className="text-gray-500">Click "Suggest Messages" to load questions.</p>
+              <p className="text-gray-500">Click Suggest Messages to load questions.</p>
             )}
           </CardContent>
         </Card>

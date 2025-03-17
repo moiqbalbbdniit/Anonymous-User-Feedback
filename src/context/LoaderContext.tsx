@@ -17,7 +17,7 @@ const LoaderContext = createContext<LoaderContextType>({
 export const LoaderProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
+  // const router = useRouter();
 
   const startLoading = () => setIsLoading(true);
   const stopLoading = () => setTimeout(() => setIsLoading(false), 700); // Delay hiding for smooth transition

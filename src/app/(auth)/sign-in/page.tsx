@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useLoader } from '@/context/LoaderContext';
-import { start } from 'node:repl';
+
 
 // Validation Schema
 const signInSchema = z.object({
@@ -71,7 +71,7 @@ export default function SignInForm() {
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-            Welcome Back to Iqbal's Project
+            Welcome Back to Iqbal&apos;s Project
           </h1>
           <p className="mb-4">Sign in to continue your secret conversations</p>
         </div>
