@@ -62,7 +62,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-400">
-                Whether you're a creator, student, or team lead — this platform is for you.
+                Whether you&apos;re a creator, student, or team lead — this platform is for you.
               </p>
             </CardContent>
           </Card>
