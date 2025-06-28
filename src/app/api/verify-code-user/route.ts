@@ -1,3 +1,8 @@
+// src/app/api/verify-code-user/route.ts
+
+export async function POST() {
+  return new Response("This route is disabled", { status: 410 });
+}
 
 // import dbConnect from '@/lib/dbConnect';
 // import UserModel from '@/model/User';
