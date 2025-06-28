@@ -31,9 +31,9 @@ export const authOptions: NextAuthOptions = {
             throw new Error("No user found with this email");
           }
 
-          if (!user.isVerified) {
-            throw new Error("Please verify your account before logging in");
-          }
+          // if (!user.isVerified) {
+          //   throw new Error("Please verify your account before logging in");
+          // }
 
           const isPasswordCorrect = await bcrypt.compare(
             credentials.password,
@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }: { token: JWT; user?: User }): Promise<JWT> {
       if (user) {
         token._id = user._id?.toString();
-        token.isVerified = user.isVerified;
+        // token.isVerified = user.isVerified;
         token.isAcceptingMessage = user.isAcceptingMessage;
         token.username = user.username;
       }
@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
       if (token) {
         session.user._id = token._id;
-        session.user.isVerified = token.isVerified;
+        // session.user.isVerified = token.isVerified;
         session.user.isAcceptingMessage = token.isAcceptingMessage;
         session.user.username = token.username;
       }
